@@ -32,11 +32,8 @@ type Config struct {
 	}
 
 	Image struct {
-		Name       string   `envconfig:"DRONE_IMAGE"`
-		Pull       bool     `envconfig:"DRONE_IMAGE_PULL"`
-		Entrypoint []string `envconfig:"DRONE_IMAGE_ENTRYPOINT"`
-		Command    string   `envconfig:"DRONE_IMAGE_COMMAND"`
-		Args       []string `envconfig:"DRONE_IMAGE_ARGS"`
+		Name string `envconfig:"DRONE_IMAGE"      default:"drone/drone-runner-docker:latest"`
+		Pull bool   `envconfig:"DRONE_IMAGE_PULL" default:"false"`
 	}
 
 	Server struct {
@@ -47,6 +44,11 @@ type Config struct {
 		SkipVerify bool   `envconfig:"DRONE_RPC_SKIP_VERIFY"`
 		Dump       bool   `envconfig:"DRONE_RPC_DUMP_HTTP"`
 		DumpBody   bool   `envconfig:"DRONE_RPC_DUMP_HTTP_BODY"`
+	}
+
+	Callback struct {
+		Proto string `envconfig:"DRONE_CALLBACK_PROTO"`
+		Host  string `envconfig:"DRONE_CALLBACK_HOST"`
 	}
 
 	// Environment is a collection of all DRONE_ environment
@@ -135,6 +137,17 @@ func Load() (Config, error) {
 			config.Environ = map[string]string{}
 		}
 		config.Environ[k] = v
+	}
+
+	// WARNING
+	// this is intended for local development only and
+	// instructs the docker runner to use a different server
+	// url than the nomad runner.
+	if v := config.Callback.Host; v != "" {
+		config.Environ["DRONE_RPC_HOST"] = v
+	}
+	if v := config.Callback.Proto; v != "" {
+		config.Environ["DRONE_RPC_PROTO"] = v
 	}
 
 	return config, nil

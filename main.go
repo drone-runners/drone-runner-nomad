@@ -16,12 +16,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO set the defalt image name
-// TODO set the defalt image entrypoint
-// TODO set the defalt image command
-// TODO set the defalt image args
-// TODO pass the stage id to the runner task
-
 var noContext = context.Background()
 
 func main() {

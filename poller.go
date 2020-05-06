@@ -90,9 +90,11 @@ func (p *Poller) do(ctx context.Context) error {
 			"volumes": []string{
 				"/var/run/docker.sock:/var/run/docker.sock",
 			},
-			"entrypoint": p.config.Image.Entrypoint,
-			"command":    p.config.Image.Command,
-			"args":       p.config.Image.Args,
+			"entrypoint": []string{
+				"/bin/drone-runner-docker",
+				"process",
+				fmt.Sprint(stage.ID),
+			},
 		},
 	}
 
@@ -180,7 +182,10 @@ func (p *Poller) do(ctx context.Context) error {
 		})
 	}
 
-	logrus.Debug("creating nomad job")
+	logrus.
+		WithField("image.name", p.config.Image.Name).
+		WithField("image.pull", p.config.Image.Pull).
+		Debug("creating nomad job")
 	_, _, err = p.client.Jobs().RegisterOpts(job, &api.RegisterOptions{}, nil)
 	if err != nil {
 		logrus.WithError(err).
